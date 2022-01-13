@@ -1,4 +1,4 @@
-import { getRandomArbitrary, getRandomArrayElement } from './util.js';
+import { getRandomArbitrary, getRandomArrayElement, makeUniqueRandomIntegerGenerator } from './util.js';
 
 const MAX_PRICE = 2000000;
 const MAX_ROOMS = 10;
@@ -65,7 +65,7 @@ const PHOTO_LINKS = [
 ];
 
 const createFeatures = () => {
-  const arrayLength = getRandomArbitrary(0, FEATURE_NAMES.length);
+  const arrayLength = getRandomArbitrary(1, FEATURE_NAMES.length);
   const features = [];
 
   while (features.length < arrayLength) {
@@ -113,9 +113,7 @@ const createLocation = () => {
   }
 }
 
-const createAdvert = (avatar) => {
-  const location = createLocation();
-
+const createAdvert = (avatar, location) => {
   return {
     author: { avatar },
     offer: createOffer(location),
@@ -124,13 +122,21 @@ const createAdvert = (avatar) => {
 }
 
 
-let advertisements = [];
+const createAdvertisements = () => {
+  let advertisements = [];
 
-for (let i = 1; i < ADS_COUNT + 1; i++) {
-  let index = i < 10 ? `0${i}` : i;
+  const getUniqueRandomInteger = makeUniqueRandomIntegerGenerator(1, ADS_COUNT);
 
-  let advert = createAdvert(`../img/avatars/user${index}.png`);
-  advertisements.push(advert);
+  for (let i = 1; i < ADS_COUNT + 1; i++) {
+    const location = createLocation();
+    let num = getUniqueRandomInteger();
+    let index = num < 10 ? `0${num}` : num;
+
+    let advert = createAdvert(`../img/avatars/user${index}.png`, location);
+    advertisements.push(advert);
+  }
+  return advertisements;
 }
 
-export { advertisements };
+
+export { createAdvertisements };

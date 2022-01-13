@@ -1,3 +1,3 @@
-import { advertisements } from './data.js';
+import { renderAdverts } from './advertisement.js';
 
-console.log(advertisements);
+renderAdverts();

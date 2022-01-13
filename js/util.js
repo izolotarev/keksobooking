@@ -10,4 +10,20 @@ const getRandomArrayElement = (elements) => {
   return elements[getRandomArbitrary(0, elements.length - 1)];
 };
 
-export { getRandomArbitrary, getRandomArrayElement};
+const makeUniqueRandomIntegerGenerator = (min, max) => {
+  const previousValues = [];
+
+  return () => {
+    let currentValue = getRandomArbitrary(min, max, 0);
+    if (previousValues.length >= (max - min + 1)) {
+      throw new Error('Перебраны все числа из диапазона от ' + min + ' до ' + max);
+    }
+    while (previousValues.includes(currentValue)) {
+      currentValue = getRandomArbitrary(min, max, 0);
+    }
+    previousValues.push(currentValue);
+    return currentValue;
+  };
+};
+
+export { getRandomArbitrary, getRandomArrayElement, makeUniqueRandomIntegerGenerator};
