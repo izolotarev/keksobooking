@@ -65,7 +65,7 @@ const PHOTO_LINKS = [
 ];
 
 const createFeatures = () => {
-  const arrayLength = getRandomArbitrary(1, FEATURE_NAMES.length);
+  const arrayLength = getRandomArbitrary(0, FEATURE_NAMES.length);
   const features = [];
 
   while (features.length < arrayLength) {

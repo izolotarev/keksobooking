@@ -26,4 +26,6 @@ const makeUniqueRandomIntegerGenerator = (min, max) => {
   };
 };
 
-export { getRandomArbitrary, getRandomArrayElement, makeUniqueRandomIntegerGenerator};
+
+
+export { getRandomArbitrary, getRandomArrayElement, makeUniqueRandomIntegerGenerator };
