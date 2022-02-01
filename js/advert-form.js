@@ -1,6 +1,7 @@
 import { sendData } from './api.js';
 import { handleError, showAlert, createSuccessMessage } from './errorHandler.js';
 import { clearFilters } from './filters.js';
+import {removeAvatar, removeHousingPreview} from './preview.js';
 
 const offerType = document.querySelector('#type');
 const offerPrice = document.querySelector('#price');
@@ -38,7 +39,6 @@ const addSyncTimeHandler = (timeFirst, timeSecond) => {
 addSyncTimeHandler(timein, timeout);
 addSyncTimeHandler(timeout, timein);
 
-//Switch states
 const adForm = document.querySelector('.ad-form');
 const adFormFieldsets = adForm.querySelectorAll('fieldset');
 const mapFiltersForm = document.querySelector('.map__filters');
@@ -50,8 +50,6 @@ const toggleFormState = (active) => {
   mapFiltersForm.classList.toggle('map__filters--disabled', !active);
   mapFiltersFieldsets.forEach(fieldset => fieldset.disabled = !active);
 }
-
-toggleFormState(false);
 
 //validation
 const titleInput = adForm.querySelector('#title');
@@ -102,20 +100,22 @@ const onAdvertFormSubmit = (evt) => {
 
 adForm.addEventListener('submit', onAdvertFormSubmit);
 
-const setFormInitialState = (setInitialAddress) => {
+const setFormInitialState = (cb) => {
   adForm.reset();
   onOfferTypeChange();
   validateRooms();
-  setInitialAddress();
   clearFilters();
+  removeAvatar();
+  removeHousingPreview();
+  cb(); //Set initial address
 }
 
 const resetButton = adForm.querySelector('.ad-form__reset');
 
-const addResetButtonEventHandler = (setInitialAddress) => {
+const addResetButtonEventHandler = (cb) => {
   resetButton.addEventListener('click', (evt) => {
     evt.preventDefault();
-    setFormInitialState(setInitialAddress);
+    setFormInitialState(cb);
   });
 }
 

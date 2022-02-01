@@ -2,6 +2,8 @@ import { toggleFormState } from './advert-form.js';
 import { renderAdvert } from './advertisement.js';
 import { getData } from './api.js';
 import { handleError } from './errorHandler.js';
+import { filterAdverts } from './filters.js';
+import { debounce } from './debounce.js';
 
 const ADVERTS_COUNT = 10;
 const MAP_ZOOM = 12;
@@ -13,6 +15,7 @@ const ATTRIBUTION = '&copy; <a href="https://www.openstreetmap.org/copyright">Op
 //center of Tokyo
 const  LAT = 35.68041;
 const  LNG = 139.76912;
+const RERENDER_DELAY = 500;
 
 const MainPinSize = {
   WIDTH: 52,
@@ -25,11 +28,15 @@ const PointPinSize = {
 
 let address = document.querySelector('#address');
 address.readOnly = true;
+const filters = document.querySelector('.map__filters');
 
-const setPointsOnMap = () => {
-  getData((adverts) => {
-    adverts = adverts.slice(0, ADVERTS_COUNT);
-    adverts.forEach((advert) => {
+const setPointsOnMap = (adverts) => {
+  map.closePopup();
+  const filteredAdverts = filterAdverts(adverts.slice());
+
+  filteredAdverts
+    .slice(0, ADVERTS_COUNT)
+    .forEach((advert) => {
       const lat = advert.location.lat;
       const lng = advert.location.lng;
 
@@ -50,20 +57,28 @@ const setPointsOnMap = () => {
       );
 
       marker
-        .addTo(map)
+        .addTo(markerGroup)
         .bindPopup(renderAdvert(advert), {
           keepInView: true,
         });
     });
-  }, (err) => handleError(err));
 }
 
 const updateAddressInput = (lat, lng) => address.value = `${ lat.toFixed(DECIMALS) }, ${ lng.toFixed(DECIMALS) }`;
 
+//Not Active state
+toggleFormState(false);
+
 const onMapLoad = () => {
   toggleFormState(true);
   updateAddressInput(LAT, LNG);
-  setPointsOnMap();
+  getData(
+    (adverts) => {
+      setPointsOnMap(adverts);
+      setFiltersChange(debounce(() => setPointsOnMap(adverts), RERENDER_DELAY));
+    },
+    (err) => handleError(err),
+  );
 }
 
 /* global L:readonly */
@@ -80,6 +95,8 @@ L.tileLayer(
     attribution: ATTRIBUTION,
   },
 ).addTo(map);
+
+const markerGroup = L.layerGroup().addTo(map);
 
 const mainPinIcon = L.icon({
   iconUrl: MAIN_PIN_ICON_PATH,
@@ -104,6 +121,13 @@ mainPinMarker.on('move', (evt) => {
   const { lat, lng } = evt.target.getLatLng();
   updateAddressInput(lat, lng);
 });
+
+const setFiltersChange = (cb) => {
+  filters.addEventListener('change', () => {
+    markerGroup.clearLayers();
+    cb();
+  });
+}
 
 const setInitialAddress = () => {
   mainPinMarker.setLatLng({
